@@ -1,6 +1,6 @@
-/*! d4 - v0.8.4
+/*! d4 - v0.8.2
  *  License: MIT Expat
- *  Date: 2014-05-19
+ *  Date: 2014-06-11
  *  Copyright: Mark Daggett, D4 Team
  */
 /*!
@@ -201,7 +201,7 @@
    *       chart.builder(function() {
    *           return {
    *               link: function(chart, data) {
-   *                   console.log(chart.x.domain.$dirty) // false;
+   *                   console.log(chart.x.domain.$dirty); // == false
    *               }
    *           }
    *       });
@@ -357,8 +357,8 @@
 
   var scaffoldChart = function(selection) {
     this.svg = d4.appendOnce(d3.select(selection), 'svg#chart.d4.chart')
-      .attr('width', Math.max(0, this.width + this.margin.left + this.margin.right))
-      .attr('height', Math.max(0, this.height + this.margin.top + this.margin.bottom));
+      .attr('width', this.width + this.margin.left + this.margin.right)
+      .attr('height', this.height + this.margin.top + this.margin.bottom);
 
     d4.appendOnce(this.svg, 'defs');
     d4.appendOnce(this.svg, 'g.margins')
@@ -519,7 +519,7 @@
       characterEncoding = '(?:\\\\.|[\\w-]|[^\\x00-\\xa0])+',
       identifier = characterEncoding.replace('w', 'w#'),
       attributes = '\\[' + whitespace + '*(' + characterEncoding + ')' + whitespace +
-        '*(?:([*^$|!~]?=)' + whitespace + '*(?:([\'"])((?:\\\\.|[^\\\\])*?)\\3|(' + identifier + ')|)|)' + whitespace + '*\\]',
+      '*(?:([*^$|!~]?=)' + whitespace + '*(?:([\'"])((?:\\\\.|[^\\\\])*?)\\3|(' + identifier + ')|)|)' + whitespace + '*\\]',
       order = ['TAG', 'ID', 'CLASS'],
       matchers = {
         'ID': new RegExp('#(' + characterEncoding + ')'),
@@ -1405,17 +1405,17 @@
    */
   d4.chart('donut', function donut() {
     return d4.baseChart({
-      config: {
-        accessors: {
-          radius: function() {
-            return Math.min(this.width, this.height) / 2;
-          },
-          arcWidth: function(radius) {
-            return radius / 3;
+        config: {
+          accessors: {
+            radius: function() {
+              return Math.min(this.width, this.height) / 2;
+            },
+            arcWidth: function(radius) {
+              return radius / 3;
+            }
           }
         }
-      }
-    })
+      })
       .mixin(
         [{
           'name': 'arcs',
@@ -1497,12 +1497,12 @@
     };
 
     return d4.baseChart({
-      config: {
-        accessors: {
-          groupsOf: 1
+        config: {
+          accessors: {
+            groupsOf: 1
+          }
         }
-      }
-    })
+      })
       .mixin([{
         'name': 'bars',
         'feature': d4.features.groupedColumnSeries
@@ -1583,33 +1583,33 @@
             var height = this.y.rangeBand() / this.groupsOf;
             var yPos = this.y(d[this.y.$key]) + height * i;
             var gutter = height * 0.1;
-            return yPos + height / 4 + gutter;
+            return yPos + height / 2 + gutter;
           }
         }
       };
     };
 
     return d4.baseChart({
-      config: {
-        accessors: {
-          groupsOf: 1
-        },
-        margin: {
-          top: 20,
-          right: 40,
-          bottom: 20,
-          left: 40
-        },
-        axes: {
-          x: {
-            scale: 'linear'
+        config: {
+          accessors: {
+            groupsOf: 1
           },
-          y: {
-            scale: 'ordinal'
+          margin: {
+            top: 20,
+            right: 40,
+            bottom: 20,
+            left: 40
+          },
+          axes: {
+            x: {
+              scale: 'linear'
+            },
+            y: {
+              scale: 'ordinal'
+            }
           }
         }
-      }
-    })
+      })
       .mixin([{
         'name': 'bars',
         'feature': d4.features.groupedColumnSeries
@@ -1735,24 +1735,24 @@
    */
   d4.chart('row', function row() {
     return d4.baseChart({
-      config: {
-        margin: {
-          top: 20,
-          right: 40,
-          bottom: 20,
-          left: 40
-        },
-        valueKey: 'x',
-        axes: {
-          x: {
-            scale: 'linear'
+        config: {
+          margin: {
+            top: 20,
+            right: 40,
+            bottom: 20,
+            left: 40
           },
-          y: {
-            scale: 'ordinal'
+          valueKey: 'x',
+          axes: {
+            x: {
+              scale: 'linear'
+            },
+            y: {
+              scale: 'ordinal'
+            }
           }
         }
-      }
-    })
+      })
       .mixin([{
         'name': 'bars',
         'feature': d4.features.rectSeries
@@ -1896,18 +1896,18 @@
    */
   d4.chart('scatterPlot', function scatterPlot() {
     return d4.baseChart({
-      builder: scatterPlotBuilder,
-      config: {
-        axes: {
-          x: {
-            scale: 'linear'
-          },
-          z: {
-            scale: 'linear'
+        builder: scatterPlotBuilder,
+        config: {
+          axes: {
+            x: {
+              scale: 'linear'
+            },
+            z: {
+              scale: 'linear'
+            }
           }
         }
-      }
-    })
+      })
       .mixin([{
         'name': 'circles',
         'feature': d4.features.circleSeries,
@@ -2191,23 +2191,23 @@
     };
 
     return d4.baseChart({
-      config: {
-        margin: {
-          top: 20,
-          right: 40,
-          bottom: 20,
-          left: 40
-        },
-        axes: {
-          x: {
-            scale: 'linear'
+        config: {
+          margin: {
+            top: 20,
+            right: 40,
+            bottom: 20,
+            left: 40
           },
-          y: {
-            scale: 'ordinal'
+          axes: {
+            x: {
+              scale: 'linear'
+            },
+            y: {
+              scale: 'ordinal'
+            }
           }
         }
-      }
-    })
+      })
       .mixin([{
         'name': 'bars',
         'feature': d4.features.rectSeries
@@ -2426,8 +2426,8 @@
    */
   d4.chart('waterfall', function waterfallChart() {
     return d4.baseChart({
-      builder: waterfallChartBuilder
-    })
+        builder: waterfallChartBuilder
+      })
       .mixin([{
         'name': 'bars',
         'feature': d4.features.rectSeries,
@@ -3676,7 +3676,6 @@
   d4.feature('trendLine', function(name) {
     return {
       accessors: {
-        tipSize: 6,
         text: function(d) {
           return d[this.valueKey];
         },
@@ -3713,8 +3712,8 @@
           .attr('viewBox', '0 0 10 10')
           .attr('refX', 10)
           .attr('refY', 5)
-          .attr('markerWidth', d4.functor(scope.accessors.tipSize).bind(this)())
-          .attr('markerHeight', d4.functor(scope.accessors.tipSize).bind(this))
+          .attr('markerWidth', 6)
+          .attr('markerHeight', 6)
           .attr('orient', 'auto')
           .append('path')
           .attr('d', 'M 0 0 L 10 5 L 0 10 z');
@@ -4171,23 +4170,8 @@
       },
       data: []
     };
-
-    opts.defined = function() {
-      return true;
-    };
-
     opts.nestKey = function() {
       return opts.x.key;
-    };
-
-    var removeUndefinedValues = function(items) {
-      var onlyDefined = [];
-      d4.each(items, function(i) {
-        if (opts.defined(i)) {
-          onlyDefined.push(i);
-        }
-      }.bind(this));
-      return onlyDefined;
     };
 
     var findValues = function(dimensions, items) {
@@ -4217,7 +4201,6 @@
       }
 
       findValues(opts, opts.data);
-      opts.data = removeUndefinedValues(opts.data);
       opts.data = nestByDimension(opts.nestKey(), opts.value.key, opts.data);
 
       return opts;
@@ -4225,11 +4208,6 @@
 
     parser.nestKey = function(funct) {
       opts.nestKey = d4.functor(funct).bind(opts);
-      return parser;
-    };
-
-    parser.defined = function(funct) {
-      opts.defined = d4.functor(funct).bind(opts);
       return parser;
     };
 
@@ -4360,24 +4338,10 @@
       },
       data: []
     };
-
-    opts.defined = function() {
-      return true;
-    };
-
     opts.nestKey = function() {
       return opts.y.key;
     };
 
-    var removeUndefinedValues = function(items) {
-      var onlyDefined = [];
-      d4.each(items, function(i) {
-        if (opts.defined(i)) {
-          onlyDefined.push(i);
-        }
-      }.bind(this));
-      return onlyDefined;
-    };
 
     var findValues = function(dimensions, items) {
       ['x', 'y', 'value'].forEach(function(k) {
@@ -4438,7 +4402,6 @@
       }
 
       findValues(opts, opts.data);
-      opts.data = removeUndefinedValues(opts.data);
       opts.data = nestByDimension(opts.nestKey(), opts.value.key, opts.data);
 
       stackByDimension(opts.x.key, opts.data);
@@ -4447,11 +4410,6 @@
 
     parser.nestKey = function(funct) {
       opts.nestKey = d4.functor(funct).bind(opts);
-      return parser;
-    };
-
-    parser.defined = function(funct) {
-      opts.defined = d4.functor(funct).bind(opts);
       return parser;
     };
 
