@@ -164,6 +164,16 @@ module.exports = function(grunt) {
           src: [
             'generated/*'
           ]
+        }, {
+          expand: true,
+          cwd: 'bower_components',
+          dest: '<%= app.dist %>/assets/js',
+          src: ['*/dist/**/*.*', 'd3/**/*.*']
+        }, {
+          expand: true,
+          cwd: '<%= app.src %>/assets/',
+          dest: '<%= app.dist %>/assets',
+          src: ['vendor/**/*.*', 'js/**/*.*']
         }]
       },
       styles: {
@@ -247,8 +257,8 @@ module.exports = function(grunt) {
     'concurrent:dist',
     'concat',
     'copy:dist',
-    'uglify',
-    'usemin',
+    //'uglify',
+    //'usemin',
   ]);
 
   grunt.registerTask('default', [
