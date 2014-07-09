@@ -1,6 +1,6 @@
-/*! d4 - v0.8.2
+/*! d4 - v0.8.4
  *  License: MIT Expat
- *  Date: 2014-06-11
+ *  Date: 2014-07-09
  *  Copyright: Mark Daggett, D4 Team
  */
 /*!
@@ -357,8 +357,8 @@
 
   var scaffoldChart = function(selection) {
     this.svg = d4.appendOnce(d3.select(selection), 'svg#chart.d4.chart')
-      .attr('width', this.width + this.margin.left + this.margin.right)
-      .attr('height', this.height + this.margin.top + this.margin.bottom);
+      .attr('width', Math.max(0, this.width + this.margin.left + this.margin.right))
+      .attr('height', Math.max(0, this.height + this.margin.top + this.margin.bottom));
 
     d4.appendOnce(this.svg, 'defs');
     d4.appendOnce(this.svg, 'g.margins')
@@ -1583,7 +1583,7 @@
             var height = this.y.rangeBand() / this.groupsOf;
             var yPos = this.y(d[this.y.$key]) + height * i;
             var gutter = height * 0.1;
-            return yPos + height / 2 + gutter;
+            return yPos + height / 4 + gutter;
           }
         }
       };
@@ -1878,7 +1878,7 @@
    *
    *      var chart = d4.charts.scatterPlot()
    *      .x(function(x){
-   *        x.min(-10)
+   *        x.min(-10);
    *        x.key('age');
    *      })
    *      .y(function(y){
@@ -3669,6 +3669,75 @@
 (function() {
   'use strict';
   /*
+   * The title is using for draw main text at the top of the chart
+   *
+   * @name title
+   */
+  d4.feature('title', function(name) {
+
+
+    var textRect = function(text, klasses) {
+      var rect = d4.helpers.textSize(text, klasses);
+      rect.text = text;
+      return rect;
+    };
+
+    var positionText = function(obj, aligned, width, klass) {
+      if (obj.text) {
+        var titlesContainer = this.svg.selectAll('.titles');
+        var titlesContainerBB = titlesContainer.node().getBBox();
+        var height, textHeight = obj.height * 2;
+        if (klass === 'subtitle') {
+          height = "-16";
+        } else {
+          height = "-26";
+        }
+        var text = titlesContainer.append('text')
+          .text(obj.text)
+          .attr('class', '' + klass);
+        //((titlesContainerBB.height - textHeight) - 3)
+        if (aligned.toLowerCase() === 'bottom') {
+          text.attr('transform', 'translate(' + width / 2 + ',' + (titlesContainerBB.height + textHeight) + ')');
+        } else {
+          text.attr('transform', 'translate(' + width / 2 + ',' + height + ')');
+        }
+      }
+    };
+
+    return {
+      accessors: {
+        align: 'top',
+        width: 500, // Default width
+        title: undefined,
+        subtitle: undefined
+      },
+      render: function(scope, data, selection) {
+        var title = textRect(d4.functor(scope.accessors.title).bind(this)(), 'title'),
+          subtitle = textRect(d4.functor(scope.accessors.subtitle).bind(this)(), 'subtitle'),
+          aligned = d4.functor(scope.accessors.align).bind(this)(),
+          width = d4.functor(scope.accessors.width).bind(this)();
+
+        this.svg.select('g.margins').insert('g')
+          .attr('width', width)
+          .attr('text-anchor', 'middle')
+          .attr('class', 'titles ' + name);
+
+        if (aligned === 'top') {
+          positionText.bind(this)(title, aligned, width, 'title');
+          positionText.bind(this)(subtitle, aligned, width, 'subtitle');
+        } else {
+          positionText.bind(this)(title, aligned, width, 'title');
+          positionText.bind(this)(subtitle, aligned, width, 'subtitle');
+        }
+        return title;
+      }
+    };
+  });
+}).call(this);
+
+(function() {
+  'use strict';
+  /*
    * A trendline allows you to associate a line with a numerical value.
    *
    * @name trendLine
@@ -3676,6 +3745,8 @@
   d4.feature('trendLine', function(name) {
     return {
       accessors: {
+        tipSize: 6,
+
         text: function(d) {
           return d[this.valueKey];
         },
@@ -3712,8 +3783,8 @@
           .attr('viewBox', '0 0 10 10')
           .attr('refX', 10)
           .attr('refY', 5)
-          .attr('markerWidth', 6)
-          .attr('markerHeight', 6)
+          .attr('markerWidth', d4.functor(scope.accessors.tipSize).bind(this)())
+          .attr('markerHeight', d4.functor(scope.accessors.tipSize).bind(this))
           .attr('orient', 'auto')
           .append('path')
           .attr('d', 'M 0 0 L 10 5 L 0 10 z');
@@ -4170,8 +4241,23 @@
       },
       data: []
     };
+
+    opts.defined = function() {
+      return true;
+    };
+
     opts.nestKey = function() {
       return opts.x.key;
+    };
+
+    var removeUndefinedValues = function(items) {
+      var onlyDefined = [];
+      d4.each(items, function(i) {
+        if (opts.defined(i)) {
+          onlyDefined.push(i);
+        }
+      }.bind(this));
+      return onlyDefined;
     };
 
     var findValues = function(dimensions, items) {
@@ -4201,6 +4287,7 @@
       }
 
       findValues(opts, opts.data);
+      opts.data = removeUndefinedValues(opts.data);
       opts.data = nestByDimension(opts.nestKey(), opts.value.key, opts.data);
 
       return opts;
@@ -4208,6 +4295,11 @@
 
     parser.nestKey = function(funct) {
       opts.nestKey = d4.functor(funct).bind(opts);
+      return parser;
+    };
+
+    parser.defined = function(funct) {
+      opts.defined = d4.functor(funct).bind(opts);
       return parser;
     };
 
@@ -4338,10 +4430,24 @@
       },
       data: []
     };
+
+    opts.defined = function() {
+      return true;
+    };
+
     opts.nestKey = function() {
       return opts.y.key;
     };
 
+    var removeUndefinedValues = function(items) {
+      var onlyDefined = [];
+      d4.each(items, function(i) {
+        if (opts.defined(i)) {
+          onlyDefined.push(i);
+        }
+      }.bind(this));
+      return onlyDefined;
+    };
 
     var findValues = function(dimensions, items) {
       ['x', 'y', 'value'].forEach(function(k) {
@@ -4402,6 +4508,7 @@
       }
 
       findValues(opts, opts.data);
+      opts.data = removeUndefinedValues(opts.data);
       opts.data = nestByDimension(opts.nestKey(), opts.value.key, opts.data);
 
       stackByDimension(opts.x.key, opts.data);
@@ -4410,6 +4517,11 @@
 
     parser.nestKey = function(funct) {
       opts.nestKey = d4.functor(funct).bind(opts);
+      return parser;
+    };
+
+    parser.defined = function(funct) {
+      opts.defined = d4.functor(funct).bind(opts);
       return parser;
     };
 
